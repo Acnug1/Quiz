@@ -4,15 +4,19 @@
 
 public class GridObject : MonoBehaviour
 {
-    [SerializeField] private GridLayer _layer;
+    [SerializeField] private string _cellIdentifier;
 
     private SpriteRenderer _spriteRenderer;
 
-    public GridLayer Layer => _layer;
+    public string CellIdentifier => _cellIdentifier;
 
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        _spriteRenderer.sortingOrder = (int)_layer;
+    }
+
+    public void SetLayer(GridLayer layer)
+    {
+        _spriteRenderer.sortingOrder = (int)layer;
     }
 }

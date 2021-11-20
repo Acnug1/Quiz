@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
 {
-    [SerializeField] private GridObject[] _templates;
-    [SerializeField] private CellBundleData[] _dataSet;
+    [SerializeField] private CellBundleData[] _bundles;
     [SerializeField] private float _gridColumnsSize;
     [SerializeField] private float _gridRowsSize;
     [SerializeField] private float _cellSize;
 
     private Camera _camera;
-    private CellBundleData _cellBundleData;
+    private CellBundleData _onGridBundleData;
+    private CellBundleData _gridBundleData;
     private HashSet<GridObject> _gridObjects = new HashSet<GridObject>();
-    private HashSet<GridObject> _randomVariants = new HashSet<GridObject>();
     private int _cellCountAxisX;
     private int _cellCountAxisY;
 
@@ -31,20 +30,18 @@ public class GridGenerator : MonoBehaviour
 
     private void Awake()
     {
-        _cellBundleData = TryGetRandomCellBundleData();
-
-        _templates = _templates.Distinct().ToArray();
+        _gridBundleData = GetRandomCellBundleData(GridLayer.Grid);
+        _onGridBundleData = GetRandomCellBundleData(GridLayer.OnGrid);
     }
 
-    private CellBundleData TryGetRandomCellBundleData()
+    private CellBundleData GetRandomCellBundleData(GridLayer layer)
     {
-        foreach (var cellBundleData in _dataSet)
-        {
-            if (cellBundleData.BundleIdentifier != null)
-                return _dataSet[Random.Range(0, _dataSet.Length)]; 
-        }
+        CellBundleData[] suitableBundles = _bundles.Where(
+            _bundle => _bundle.Layer == layer &&
+            _bundle.GetObjectsNumber() >= GetTotalCells()
+        ).ToArray();
 
-        return null;
+        return suitableBundles[Random.Range(0, suitableBundles.Length)];
     }
 
     private void Start()
@@ -66,53 +63,48 @@ public class GridGenerator : MonoBehaviour
     private void FillGrid(Vector2 startSpawnPosition, int cellCountAxisX, int cellCountAxisY)
     {
         var startFillArea = WorldToGridPosition(startSpawnPosition);
+        GridObject[] gridObjects = GetRandomGridObjects(_gridBundleData);
+        GridObject[] onGridObjects = GetRandomGridObjects(_onGridBundleData);
+        int objectIndex = 0;
 
         for (int x = 0; x < cellCountAxisX; x++)
         {
             for (int y = 0; y < cellCountAxisY; y++)
             {
-                TryCreateRandomObjectOnLayer(GridLayer.Grid, startFillArea + new Vector2Int(x, y));
-                TryCreateRandomObjectOnLayer(GridLayer.OnGrid, startFillArea + new Vector2Int(x, y));
+                CreateObjectOnLayer(GridLayer.Grid, startFillArea + new Vector2Int(x, y), gridObjects[objectIndex]);
+                CreateObjectOnLayer(GridLayer.OnGrid, startFillArea + new Vector2Int(x, y), onGridObjects[objectIndex++]);
             }
         }
     }
 
-    private void TryCreateRandomObjectOnLayer(GridLayer layer, Vector2Int gridPosition)
+    private GridObject[] GetRandomGridObjects(CellBundleData bundle)
     {
-        GridObject template = TryGetRandomTemplate(layer);
+        List<GridObject> newBundle = bundle.GetCollectionCopy().ToList();
 
-        if (template == null)
-            return;
+        GridObject[] result = new GridObject[GetTotalCells()];
 
+        for (int i = 0; i < result.Length; i++)
+        {
+            GridObject cell = newBundle[Random.Range(0, newBundle.Count)];
+            result[i] = cell;
+            newBundle.Remove(cell);
+        }
+
+        return result;
+    }
+
+    private void CreateObjectOnLayer(GridLayer layer, Vector2Int gridPosition, GridObject gridObject)
+    {
         Vector2 position = GridToWorldPosition(gridPosition);
 
-        GridObject gridObject = Instantiate(template, position, Quaternion.identity, transform);
-        _gridObjects.Add(gridObject);
+        GridObject newObject = Instantiate(gridObject, position, Quaternion.identity, transform);
+        newObject.SetLayer(layer);
+        _gridObjects.Add(newObject);
     }
 
-    private GridObject TryGetRandomTemplate(GridLayer layer)
+    private int GetTotalCells()
     {
-        GridObject randomVariant;
-
-        var variants = _templates.Where(template => template.Layer == layer).ToArray();
-
-        if (variants.Length == 1)
-            return variants[0];
-        else
-        if (variants.Length > 1 && variants.Length >= _cellCountAxisX * _cellCountAxisY)
-        {
-            do
-            {
-                randomVariant = variants[Random.Range(0, variants.Length)];
-            }
-            while (_randomVariants.Contains(randomVariant));
-
-            _randomVariants.Add(randomVariant);
-
-            return randomVariant;
-        }
-        else
-            return null;
+        return _cellCountAxisX * _cellCountAxisY;
     }
 
     private void ClearGrid()
@@ -123,7 +115,6 @@ public class GridGenerator : MonoBehaviour
         }
 
         _gridObjects = null;
-        _randomVariants = null;
     }
 
     private Vector2 GridToWorldPosition(Vector2Int gridPosition)

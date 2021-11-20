@@ -12,5 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86da3677643f2fd4f9571a33d1318024, type: 3}
   m_Name: Numbers
   m_EditorClassIdentifier: 
-  _bundleIdentifier: Numbers
-  _cellData: []
+  _layer: 2
+  _gridObject:
+  - {fileID: 7812810391257399361, guid: d385236de44d8b94282b5ee2ffc194e3, type: 3}
+  - {fileID: 3140285482374763687, guid: d9ad44a1487fbe943812891da3637844, type: 3}
+  - {fileID: 5454330341861086846, guid: 86b3d4d1682e85347a1e99bd66dc82d7, type: 3}
+  - {fileID: 6394782093999568835, guid: 37b24b51db62a594d8e514b402944def, type: 3}
+  - {fileID: -4203913752239957745, guid: 835ae2b4f72188f41baae9756c1436f1, type: 3}

@@ -408,13 +408,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d48621cba8d812b4c9e25843d0986ed2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _templates:
-  - {fileID: 4385462448007526833, guid: db5c5da2b8ff887479f40ee1a9ad5364, type: 3}
-  - {fileID: -1215916711011148060, guid: 0cb928d21e1fa0b4f919a55637d69f3d, type: 3}
-  - {fileID: -8613149887937196303, guid: 35b2d195d85906b4fb1fcf1c0057020f, type: 3}
-  - {fileID: 7652135560822960493, guid: 532e09238c7ae4f4c8f558ad7df71cae, type: 3}
-  - {fileID: -781389252091745277, guid: af80fc18d9328304382aadbd29979c7e, type: 3}
-  _dataSet: []
+  _bundles:
+  - {fileID: 11400000, guid: 08faeab9a35f40b49b9c41eb5c653933, type: 2}
+  - {fileID: 11400000, guid: 72a38ace557cb9a4bae63d532889615e, type: 2}
+  - {fileID: 11400000, guid: 97f1895177cec5f42b67e33d50c4694b, type: 2}
   _gridColumnsSize: 2
   _gridRowsSize: 2
   _cellSize: 1
