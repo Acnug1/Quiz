@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 653ed67c1651c444da483c48480f67fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _layer: 1
+  _cellIdentifier: Cell
 --- !u!114 &-2250946950667341772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,4 +109,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08381542ee3019b499cf83812c8c7e45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _alpha: 0.7
+  _alpha: 0.6

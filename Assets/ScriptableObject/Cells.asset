@@ -13,8 +13,5 @@ MonoBehaviour:
   m_Name: Cells
   m_EditorClassIdentifier: 
   _layer: 1
-  _gridObject:
-  - {fileID: 4385462448007526833, guid: db5c5da2b8ff887479f40ee1a9ad5364, type: 3}
-  - {fileID: 4385462448007526833, guid: db5c5da2b8ff887479f40ee1a9ad5364, type: 3}
-  - {fileID: 4385462448007526833, guid: db5c5da2b8ff887479f40ee1a9ad5364, type: 3}
+  _gridObjects:
   - {fileID: 4385462448007526833, guid: db5c5da2b8ff887479f40ee1a9ad5364, type: 3}

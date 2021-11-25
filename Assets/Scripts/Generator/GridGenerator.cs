@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GridGenerator : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class GridGenerator : MonoBehaviour
     private HashSet<GridObject> _gridObjects = new HashSet<GridObject>();
     private int _cellCountAxisX;
     private int _cellCountAxisY;
+
+    public event UnityAction<List<GridObject>> CopyCollectionGot;
 
     private void OnValidate()
     {
@@ -36,10 +39,7 @@ public class GridGenerator : MonoBehaviour
 
     private CellBundleData GetRandomCellBundleData(GridLayer layer)
     {
-        CellBundleData[] suitableBundles = _bundles.Where(
-            _bundle => _bundle.Layer == layer &&
-            _bundle.GetObjectsNumber() >= GetTotalCells()
-        ).ToArray();
+        CellBundleData[] suitableBundles = _bundles.Where(_bundle => _bundle.Layer == layer).ToArray();
 
         return suitableBundles[Random.Range(0, suitableBundles.Length)];
     }
@@ -79,18 +79,26 @@ public class GridGenerator : MonoBehaviour
 
     private GridObject[] GetRandomGridObjects(CellBundleData bundle)
     {
-        List<GridObject> newBundle = bundle.GetCollectionCopy().ToList();
+        List<GridObject> collectionCopy = GetSuitableCollectionCopyAsList(bundle);
 
         GridObject[] result = new GridObject[GetTotalCells()];
 
         for (int i = 0; i < result.Length; i++)
         {
-            GridObject cell = newBundle[Random.Range(0, newBundle.Count)];
+            GridObject cell = collectionCopy[Random.Range(0, collectionCopy.Count)];
             result[i] = cell;
-            newBundle.Remove(cell);
+            collectionCopy.Remove(cell);
         }
 
+        if (bundle.Layer == GridLayer.OnGrid)
+            CopyCollectionGot?.Invoke(result.ToList());
+
         return result;
+    }
+
+    private List<GridObject> GetSuitableCollectionCopyAsList(CellBundleData bundle)
+    {
+        return bundle.GetSuitableCollectionCopy(GetTotalCells()).ToList();
     }
 
     private void CreateObjectOnLayer(GridLayer layer, Vector2Int gridPosition, GridObject gridObject)
