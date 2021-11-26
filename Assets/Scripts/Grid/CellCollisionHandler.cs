@@ -19,6 +19,6 @@ public class CellCollisionHandler : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        EventManager.TriggerEvent(EventName, _gridObject.CellIdentifier);
+        EventManager.TriggerEvent(EventName, _gridObject);
     }
 }

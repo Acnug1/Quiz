@@ -9,7 +9,7 @@ public class TaskHandler : MonoBehaviour
     private const string ErrorMessage = "Random Grid Object For Task is null";
     private GridObject _randomGridObjectForTask;
 
-    public event UnityAction<bool> SolutionChosen;
+    public event UnityAction<bool, GridObject> SolutionChosen;
 
     private void OnEnable()
     {
@@ -28,16 +28,16 @@ public class TaskHandler : MonoBehaviour
         _randomGridObjectForTask = randomGridObjectForTask;
     }
 
-    private void OnCellSelected(string selectedCellIdentifier)
+    private void OnCellSelected(GridObject selectedGridObject)
     {
         if (_randomGridObjectForTask == null)
             Debug.LogError(ErrorMessage);
         else
         {
-            bool isTaskSolved = CheckAccuracyTaskSolution(selectedCellIdentifier);
-            SolutionChosen?.Invoke(isTaskSolved);
+            bool isTaskSolved = CheckAccuracyTaskSolution(selectedGridObject);
+            SolutionChosen?.Invoke(isTaskSolved, selectedGridObject);
         }
     }
 
-    private bool CheckAccuracyTaskSolution(string selectedCellIdentifier) => _randomGridObjectForTask.CellIdentifier == selectedCellIdentifier;
+    private bool CheckAccuracyTaskSolution(GridObject selectedGridObject) => _randomGridObjectForTask.CellIdentifier == selectedGridObject.CellIdentifier;
 }

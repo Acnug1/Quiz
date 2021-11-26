@@ -3,13 +3,13 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class MyStringEvent : UnityEvent<string>
+public class MyGridObjectEvent : UnityEvent<GridObject>
 {
 }
 
 public class EventManager : MonoBehaviour
 {
-    Dictionary<string, MyStringEvent> eventDictionary;
+    Dictionary<string, MyGridObjectEvent> eventDictionary;
 
     static EventManager eventManager;
 
@@ -39,38 +39,38 @@ public class EventManager : MonoBehaviour
     {
         if (eventDictionary == null)
         {
-            eventDictionary = new Dictionary<string, MyStringEvent>();
+            eventDictionary = new Dictionary<string, MyGridObjectEvent>();
         }
     }
 
-    public static void StartListening(string eventName, UnityAction<string> listener)
+    public static void StartListening(string eventName, UnityAction<GridObject> listener)
     {
-        MyStringEvent thisEvent = null;
+        MyGridObjectEvent thisEvent = null;
         if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.AddListener(listener);
         }
         else
         {
-            thisEvent = new MyStringEvent();
+            thisEvent = new MyGridObjectEvent();
             thisEvent.AddListener(listener);
             instance.eventDictionary.Add(eventName, thisEvent);
         }
     }
 
-    public static void StopListening(string eventName, UnityAction<string> listener)
+    public static void StopListening(string eventName, UnityAction<GridObject> listener)
     {
         if (eventManager == null) return;
-        MyStringEvent thisEvent = null;
+        MyGridObjectEvent thisEvent = null;
         if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.RemoveListener(listener);
         }
     }
 
-    public static void TriggerEvent(string eventName, string arg)
+    public static void TriggerEvent(string eventName, GridObject arg)
     {
-        MyStringEvent thisEvent = null;
+        MyGridObjectEvent thisEvent = null;
         if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.Invoke(arg);
