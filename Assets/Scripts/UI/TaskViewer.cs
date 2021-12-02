@@ -1,19 +1,23 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(TMP_Text))]
+[RequireComponent(typeof(Text))]
 
 public class TaskViewer : MonoBehaviour
 {
+    [SerializeField] private bool _isShouldPlayAnimation;
     [SerializeField] private TaskGenerator _taskGenerator;
 
     private const string TemplateFormatText = "Find {0}";
     private const string StandartText = "";
-    private TMP_Text _taskText;
+    private Text _taskText;
+
+    public event UnityAction<Text> TaskTextIsSet;
 
     private void Awake()
     {
-        _taskText = GetComponent<TMP_Text>();
+        _taskText = GetComponent<Text>();
         _taskText.text = string.Format(TemplateFormatText, StandartText);
     }
 
@@ -38,5 +42,11 @@ public class TaskViewer : MonoBehaviour
             _taskText.text = string.Format(TemplateFormatText, randomGridObject.CellIdentifier);
         else
             _taskText.text = string.Format(TemplateFormatText, StandartText);
+
+        if (_isShouldPlayAnimation)
+        {
+            _isShouldPlayAnimation = false;
+            TaskTextIsSet?.Invoke(_taskText);
+        }
     }
 }

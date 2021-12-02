@@ -4,6 +4,7 @@ using UnityEngine.Events;
 public class TaskHandler : MonoBehaviour
 {
     [SerializeField] private TaskGenerator _taskGenerator;
+    [SerializeField] private GridGenerator _gridGenerator;
 
     private const string EventName = "CellSelected";
     private const string ErrorMessage = "Random Grid Object For Task is null";
@@ -35,9 +36,14 @@ public class TaskHandler : MonoBehaviour
         else
         {
             bool isTaskSolved = CheckAccuracyTaskSolution(selectedGridObject);
+
+            if (isTaskSolved)
+                _gridGenerator.DisableCollisionDetectionForGrid();
+
             SolutionChosen?.Invoke(isTaskSolved, selectedGridObject);
         }
     }
 
-    private bool CheckAccuracyTaskSolution(GridObject selectedGridObject) => _randomGridObjectForTask.CellIdentifier == selectedGridObject.CellIdentifier;
+    private bool CheckAccuracyTaskSolution(GridObject selectedGridObject) =>
+        _randomGridObjectForTask.CellIdentifier == selectedGridObject.CellIdentifier;
 }

@@ -6,35 +6,71 @@ using UnityEngine.Events;
 public class GridGenerator : MonoBehaviour
 {
     [SerializeField] private CellBundleData[] _bundles;
-    [SerializeField] private float _gridColumnsSize;
-    [SerializeField] private float _gridRowsSize;
-    [SerializeField] private float _cellSize;
 
     private Camera _camera;
-    private CellBundleData _onGridBundleData;
-    private CellBundleData _gridBundleData;
+    private float _cellSize;
+    private int _numberCellsOnAxisX;
+    private int _numberCellsOnAxisY;
     private HashSet<GridObject> _gridObjects = new HashSet<GridObject>();
-    private int _cellCountAxisX;
-    private int _cellCountAxisY;
 
     public event UnityAction<List<GridObject>> CopyCollectionGot;
 
-    private void OnValidate()
-    {
-        if (_gridColumnsSize <= 0)
-            _gridColumnsSize = 1;
-
-        if (_gridRowsSize <= 0)
-            _gridRowsSize = 1;
-
-        if (_cellSize <= 0)
-            _cellSize = 1;
-    }
-
     private void Awake()
     {
-        _gridBundleData = GetRandomCellBundleData(GridLayer.Grid);
-        _onGridBundleData = GetRandomCellBundleData(GridLayer.OnGrid);
+        _camera = Camera.main;
+    }
+
+    public void ClearGrid()
+    {
+        if (_gridObjects.Count == 0)
+            return;
+
+        foreach (GridObject gridObject in _gridObjects)
+        {
+            Destroy(gridObject.gameObject);
+        }
+
+        _gridObjects.Clear();
+    }
+
+    public void Init(int numberGridColumns, int numberGridRows, float cellSize)
+    {
+        CellBundleData gridBundleData;
+        CellBundleData onGridBundleData;
+
+        gridBundleData = GetRandomCellBundleData(GridLayer.Grid);
+        onGridBundleData = GetRandomCellBundleData(GridLayer.OnGrid);
+
+        _numberCellsOnAxisX = numberGridColumns;
+        _numberCellsOnAxisY = numberGridRows;
+        _cellSize = cellSize;
+
+        Vector2 startSpawnPosition = GetStartSpawnPosition();
+
+        FillGrid(startSpawnPosition, _numberCellsOnAxisX, _numberCellsOnAxisY, gridBundleData, onGridBundleData);
+    }
+
+    public void EnableCollisionDetectionForGrid()
+    {
+        CollisionDetection(true);
+    }
+
+    public void DisableCollisionDetectionForGrid()
+    {
+        CollisionDetection(false);
+    }
+
+    private void CollisionDetection(bool isEnableDetection)
+    {
+        CellCollisionHandler[] cellsWithColliders = GetComponentsInChildren<CellCollisionHandler>();
+
+        foreach (CellCollisionHandler cellWithCollider in cellsWithColliders)
+        {
+            if (isEnableDetection)
+                cellWithCollider.EnableCollisionDetection();
+            else
+                cellWithCollider.DisableCollisionDetection();
+        }
     }
 
     private CellBundleData GetRandomCellBundleData(GridLayer layer)
@@ -44,32 +80,22 @@ public class GridGenerator : MonoBehaviour
         return suitableBundles[Random.Range(0, suitableBundles.Length)];
     }
 
-    private void Start()
+    private Vector2 GetStartSpawnPosition() =>
+        _camera.transform.position - new Vector3(_numberCellsOnAxisX * _cellSize / 2f, _numberCellsOnAxisY * _cellSize / 2f, 0);
+
+    private void FillGrid(Vector2 startSpawnPosition, int numberCellsOnAxisX, int numberCellsOnAxisY,
+        CellBundleData gridBundleData, CellBundleData onGridBundleData)
     {
-        _camera = Camera.main;
-        _cellCountAxisX = ReturnCellCountAxis(_gridColumnsSize, _cellSize);
-        _cellCountAxisY = ReturnCellCountAxis(_gridRowsSize, _cellSize);
+        Vector2Int startFillArea = WorldToGridPosition(startSpawnPosition);
 
-        Vector2 startSpawnPosition = _camera.transform.position - new Vector3(_cellCountAxisX / 2f, _cellCountAxisY / 2f, 0);
+        GridObject[] gridObjects = GetRandomGridObjects(gridBundleData);
+        GridObject[] onGridObjects = GetRandomGridObjects(onGridBundleData);
 
-        FillGrid(startSpawnPosition, _cellCountAxisX, _cellCountAxisY);
-    }
-
-    private int ReturnCellCountAxis(float axisSize, float cellSize)
-    {
-        return (int)(axisSize / cellSize);
-    }
-
-    private void FillGrid(Vector2 startSpawnPosition, int cellCountAxisX, int cellCountAxisY)
-    {
-        var startFillArea = WorldToGridPosition(startSpawnPosition);
-        GridObject[] gridObjects = GetRandomGridObjects(_gridBundleData);
-        GridObject[] onGridObjects = GetRandomGridObjects(_onGridBundleData);
         int objectIndex = 0;
 
-        for (int x = 0; x < cellCountAxisX; x++)
+        for (int x = 0; x < numberCellsOnAxisX; x++)
         {
-            for (int y = 0; y < cellCountAxisY; y++)
+            for (int y = 0; y < numberCellsOnAxisY; y++)
             {
                 CreateObjectOnLayer(GridLayer.Grid, startFillArea + new Vector2Int(x, y), gridObjects[objectIndex]);
                 CreateObjectOnLayer(GridLayer.OnGrid, startFillArea + new Vector2Int(x, y), onGridObjects[objectIndex++]);
@@ -90,16 +116,17 @@ public class GridGenerator : MonoBehaviour
             collectionCopy.Remove(cell);
         }
 
+        if (collectionCopy != null)
+            collectionCopy = null;
+
         if (bundle.Layer == GridLayer.OnGrid)
             CopyCollectionGot?.Invoke(result.ToList());
 
         return result;
     }
 
-    private List<GridObject> GetSuitableCollectionCopyAsList(CellBundleData bundle)
-    {
-        return bundle.GetSuitableCollectionCopy(GetTotalCells()).ToList();
-    }
+    private List<GridObject> GetSuitableCollectionCopyAsList(CellBundleData bundle) =>
+        bundle.GetSuitableCollectionCopy(GetTotalCells()).ToList();
 
     private void CreateObjectOnLayer(GridLayer layer, Vector2Int gridPosition, GridObject gridObject)
     {
@@ -107,22 +134,13 @@ public class GridGenerator : MonoBehaviour
 
         GridObject newObject = Instantiate(gridObject, position, Quaternion.identity, transform);
         newObject.SetLayer(layer);
+        newObject.SetScale(_cellSize);
         _gridObjects.Add(newObject);
     }
 
     private int GetTotalCells()
     {
-        return _cellCountAxisX * _cellCountAxisY;
-    }
-
-    private void ClearGrid()
-    {
-        foreach (GridObject gridObject in _gridObjects)
-        {
-            Destroy(gridObject.gameObject);
-        }
-
-        _gridObjects = null;
+        return _numberCellsOnAxisX * _numberCellsOnAxisY;
     }
 
     private Vector2 GridToWorldPosition(Vector2Int gridPosition)

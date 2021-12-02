@@ -29,6 +29,7 @@ public class TaskGenerator : MonoBehaviour
     private void OnCopyCollectionGot(List<GridObject> collectionCopy)
     {
         GridObject randomGridObject = TryGetRandomGridObject(collectionCopy);
+
         RandomGridObjectSelected?.Invoke(randomGridObject);
     }
 

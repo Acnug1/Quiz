@@ -19,4 +19,12 @@ public class GridObject : MonoBehaviour
     {
         _spriteRenderer.sortingOrder = (int)layer;
     }
+
+    public Vector3 GetScale() => transform.localScale;
+
+    public void SetScale(float cellSize)
+    {
+        if (cellSize >= 0)
+            transform.localScale *= cellSize;
+    }
 }

@@ -21,4 +21,14 @@ public class CellCollisionHandler : MonoBehaviour, IPointerClickHandler
     {
         EventManager.TriggerEvent(EventName, _gridObject);
     }
+
+    public void EnableCollisionDetection()
+    {
+        _boxCollider2D.enabled = true;
+    }
+
+    public void DisableCollisionDetection()
+    {
+        _boxCollider2D.enabled = false;
+    }
 }

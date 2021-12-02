@@ -3,50 +3,50 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class MyGridObjectEvent : UnityEvent<GridObject>
-{
-}
+
+public class MyGridObjectEvent : UnityEvent<GridObject> { }
 
 public class EventManager : MonoBehaviour
 {
-    Dictionary<string, MyGridObjectEvent> eventDictionary;
+    private const string ErrorMessage = "There needs to be one active EventManger script on a GameObject in your scene.";
+    private static EventManager _eventManager;
+    private Dictionary<string, MyGridObjectEvent> _eventDictionary;
 
-    static EventManager eventManager;
-
-    public static EventManager instance
+    public static EventManager Instance
     {
         get
         {
-            if (!eventManager)
+            if (!_eventManager)
             {
-                eventManager = FindObjectOfType(typeof(EventManager)) as EventManager;
+                _eventManager = FindObjectOfType(typeof(EventManager)) as EventManager;
 
-                if (!eventManager)
+                if (!_eventManager)
                 {
-                    Debug.LogError("There needs to be one active EventManger script on a GameObject in your scene.");
+                    Debug.LogError(ErrorMessage);
                 }
                 else
                 {
-                    eventManager.Init();
+                    _eventManager.Init();
                 }
             }
 
-            return eventManager;
+            return _eventManager;
         }
     }
 
-    void Init()
+    private void Init()
     {
-        if (eventDictionary == null)
+        if (_eventDictionary == null)
         {
-            eventDictionary = new Dictionary<string, MyGridObjectEvent>();
+            _eventDictionary = new Dictionary<string, MyGridObjectEvent>();
         }
     }
 
     public static void StartListening(string eventName, UnityAction<GridObject> listener)
     {
         MyGridObjectEvent thisEvent = null;
-        if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+
+        if (Instance._eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.AddListener(listener);
         }
@@ -54,15 +54,17 @@ public class EventManager : MonoBehaviour
         {
             thisEvent = new MyGridObjectEvent();
             thisEvent.AddListener(listener);
-            instance.eventDictionary.Add(eventName, thisEvent);
+            Instance._eventDictionary.Add(eventName, thisEvent);
         }
     }
 
     public static void StopListening(string eventName, UnityAction<GridObject> listener)
     {
-        if (eventManager == null) return;
+        if (_eventManager == null) return;
+
         MyGridObjectEvent thisEvent = null;
-        if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+
+        if (Instance._eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.RemoveListener(listener);
         }
@@ -71,7 +73,8 @@ public class EventManager : MonoBehaviour
     public static void TriggerEvent(string eventName, GridObject arg)
     {
         MyGridObjectEvent thisEvent = null;
-        if (instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+
+        if (Instance._eventDictionary.TryGetValue(eventName, out thisEvent))
         {
             thisEvent.Invoke(arg);
         }
