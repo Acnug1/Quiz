@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 
@@ -24,7 +25,9 @@ public class GridObject : MonoBehaviour
 
     public void SetScale(float cellSize)
     {
-        if (cellSize >= 0)
-            transform.localScale *= cellSize;
+        if (cellSize < 0)
+            throw new ArgumentOutOfRangeException(nameof(cellSize));
+
+        transform.localScale *= cellSize;
     }
 }
